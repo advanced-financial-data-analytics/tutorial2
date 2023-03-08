@@ -1,5 +1,5 @@
 ---
-title: "HW 02 - Portfolio analytics, autocorrelation spotting"
+title: "barrog"
 subtitle: ""
 output: 
   tufte::tufte_html:
