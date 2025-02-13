@@ -1,7 +1,8 @@
 ---
-title: "Tutorial 1: Visualizing Financial Time Series and Checking Normality"
+title: "Tutorial 2: Visualizing Financial Time Series and Checking Normality"
 author: "Barry Quinn"
 date: "Last updated: `r Sys.Date()`"
+repo-url: https://advanced-financial-data-analytics.github.io/tutorial2/
 format:
     html:
         code-fold: true
