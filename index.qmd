@@ -6,6 +6,7 @@ date: "Last updated: `r Sys.Date()`"
 format:
     html:
         code-fold: true
+        embed-resources: true
         toc: true
         toc-depth: 3
         code-tools:
@@ -42,9 +43,10 @@ This tutorial helps you develop data exploration skills for financial time serie
 
 ## Financial Context
 
-- Financial time series (e.g., stock returns) are often assumed to be normally distributed for simplicity in risk/portfolio models. 
-- Empirical evidence, however, shows fat-tailed distributions, volatility clustering, and other departures from normality. 
-- Visualization is a first step in diagnosing these issues.
+- Financial time series (e.g., stock returns) are often assumed to be normally distributed for simplicity in risk/portfolio models. This assumption underlies key theories like the Capital Asset Pricing Model (CAPM) and Black-Scholes option pricing.
+- Empirical evidence, however, shows fat-tailed distributions (more extreme events than normal), volatility clustering (periods of high/low volatility tend to persist), and other departures from normality.
+- These deviations from normality can lead to underestimation of market risk, especially during crisis periods.
+- Visualization is a first step in diagnosing these issues and understanding the true nature of financial risk.
 
 # Data Setup
 
@@ -81,7 +83,10 @@ y = "Log Return"
 theme_minimal()
 ```
 
-> Prompt: Do you see any strong trend, large outliers, or recurring cycles?
+> **Economic Interpretation:**
+> - Look for clustering of volatility (periods where returns are consistently more volatile)
+> - Major spikes often correspond to significant market events or company news
+> - The overall pattern can indicate regime changes in the company's risk profile
 
 ## Seasonal Plot
 
@@ -96,7 +101,11 @@ x = "Month"
 )
 ```
 
-> If you see random scatter, that suggests little seasonal effect.
+> **Statistical & Economic Context:**
+> - While pure seasonal patterns are rare in equity returns (would violate market efficiency),
+> - Some sectors show seasonal effects (e.g., retail stocks around holidays)
+> - Trading volume often has stronger seasonality than returns
+> - If you see patterns, consider if they're economically exploitable after transaction costs
 
 ## Subseries Plot
 
@@ -133,7 +142,10 @@ glen %>%
     theme_minimal()
 ```
 
-> Prompt: Are the tails heavier or lighter than the overlaid normal?
+> **Statistical Insights:**
+> - Fat tails indicate higher probability of extreme events than predicted by normal distribution
+> - Asymmetry (skewness) might suggest different probabilities of positive vs negative returns
+> - The shape often reflects the market regime (crisis vs stable periods show different distributions)
 
 ## QQ-Plot
 
@@ -147,11 +159,12 @@ glen %>% ggplot(aes(sample = log_return)) +
     theme_minimal()
 ```
 
-
 **Interpretation:** 
 
-- Perfectly normal data should lie on the red line. 
-- Points deviating far in the upper/lower extremes may indicate fat tails or skew.
+- Points above the line in the right tail indicate more extreme positive returns than expected under normality
+- Points below the line in the left tail indicate more extreme negative returns
+- The pattern often reveals asymmetric risk (e.g., crashes being more severe than booms)
+- This has important implications for risk management and option pricing
 
 ## Shapiro-Wilk Test
 
@@ -171,9 +184,12 @@ shapiro.test(glen$log_return)
 ggAcf(glen_ts) + labs(title = "ACF: Glencore Monthly Log Returns")
 ```
 
-**Reading the ACF:** 
-- If the first lag is near zero, it implies little linear dependence between consecutive months. 
-- Significant peaks at certain lags might indicate cyclical patterns or autocorrelation.
+**ACF Interpretation:** 
+- Significant autocorrelation challenges the Efficient Market Hypothesis
+- Positive autocorrelation suggests momentum effects (trending)
+- Negative autocorrelation suggests mean reversion
+- The decay pattern of ACF can inform trading strategy horizons
+- Remember that statistical significance doesn't always equal economic significance (after costs)
 
 ## Lag Plot
 
@@ -204,9 +220,9 @@ Choose a different stock (e.g. "AMZN", "BARC.L" for Barclays, etc.) and replicat
 
 :::{.callout-tip}
 ### Key Takeaways: 
-- Visual arguments are vital: time plots, QQ-plots, and ACF often reveal critical patterns that summary stats obscure. 
-- Normality is often assumed in finance but rarely holds strictly. 
-- Autocorrelation indicates potential predictability, though many equity returns appear close to random noise.
-
-You've practiced the core of exploring a financial time series. The next step is to delve into more advanced modeling (ARIMA, GARCH, etc.) or smoothing techniques, which we'll cover in Tutorial 3.
+- Visual arguments are vital: time plots, QQ-plots, and ACF often reveal critical patterns that summary statistics obscure
+- Normality assumptions in finance are convenient but dangerous - risk models need to account for fat tails
+- Market efficiency doesn't require perfect randomness - small predictabilities may exist but be hard to profit from
+- The interaction between statistical patterns and economic reasoning is crucial for financial analysis
+- These tools form the foundation for more advanced models in risk management and trading
 :::
