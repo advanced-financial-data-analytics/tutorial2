@@ -19,14 +19,17 @@ library(DT)          # Interactive tables
 
 ## Topics Covered
 1. Time series object creation and manipulation
+
 2. Visualization techniques:
    - Time plots
    - Seasonal plots
    - Subseries plots
+
 3. Normality testing:
    - Histograms with normal distribution overlay
    - QQ plots
    - Shapiro-Wilk test
+
 4. Pattern detection:
    - Autocorrelation functions (ACF)
    - Lag plots

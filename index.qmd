@@ -30,7 +30,13 @@ library(DT)       # Optional for interactive tables
 
 # Introduction
 
-This tutorial helps you develop data exploration skills for financial time series. You will learn to: 1. Use time-series objects in R to organize your data. 2. Create effective visual arguments: time plots, seasonal plots, and subseries plots. 3. Understand distribution properties: Compare your data to the normal distribution (histogram overlays, QQ-plots). 4. Use autocorrelation (ACF) to detect patterns like trend or seasonality. 5. Draw practical conclusions about normality assumptions in finance.
+This tutorial helps you develop data exploration skills for financial time series. You will learn to: 
+
+1. Use time-series objects in R to organize your data. 
+2. Create effective visual arguments: time plots, seasonal plots, and subseries plots. 
+3. Understand distribution properties: Compare your data to the normal distribution (histogram overlays, QQ-plots). 
+4. Use autocorrelation (ACF) to detect patterns like trend or seasonality. 
+5. Draw practical conclusions about normality assumptions in finance.
 
 ## Financial Context
 
