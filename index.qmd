@@ -1,0 +1,204 @@
+---
+title: "Tutorial 1: Visualizing Financial Time Series and Checking Normality"
+author: "Barry Quinn"
+date: "Last updated: `r Sys.Date()`"
+format:
+    html:
+        code-fold: true
+        toc: true
+        toc-depth: 3
+number-sections: true
+css: mycssblend.css
+editor: visual
+execute:
+    echo: true
+    warning: false  
+    message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(tidyquant)
+library(fpp2)
+library(tsfe)     # Contains class datasets if desired
+library(ggpmisc)  # For annotation and peak/valley
+library(DT)       # Optional for interactive tables
+```
+
+# Introduction
+
+This tutorial helps you develop data exploration skills for financial time series. You will learn to: 1. Use time-series objects in R to organize your data. 2. Create effective visual arguments: time plots, seasonal plots, and subseries plots. 3. Understand distribution properties: Compare your data to the normal distribution (histogram overlays, QQ-plots). 4. Use autocorrelation (ACF) to detect patterns like trend or seasonality. 5. Draw practical conclusions about normality assumptions in finance.
+
+## Financial Context
+
+- Financial time series (e.g., stock returns) are often assumed to be normally distributed for simplicity in risk/portfolio models. 
+- Empirical evidence, however, shows fat-tailed distributions, volatility clustering, and other departures from normality. 
+- Visualization is a first step in diagnosing these issues.
+
+# Data Setup
+
+We'll illustrate with a monthly log returns series for Glencore ("GLEN.L"). Feel free to swap in other tickers or use your class data from tsfe.
+
+```{r}
+# Using tidyquant to get monthly log returns from 2018
+glen <- tq_get("GLEN.L", from = "2018-01-01") %>%
+tq_transmute(select = adjusted,
+mutate_fun = monthlyReturn,
+type = "log",
+col_rename = "log_return")
+
+# Let's convert to a ts object (freq=12 for monthly)
+glen_ts <- ts(glen$log_return, frequency = 12, start = c(2018,1))
+
+# Peek at the data
+head(glen, 10)
+```
+
+> You'll see two columns: date and log_return. The glen_ts object is for using forecast-style time-series functions.
+
+# Time-Series Visualisation
+
+## Simple Time Plot
+
+```{r}
+autoplot(glen_ts) +
+labs(
+title = "Glencore Monthly Log Returns",
+x = "Time",
+y = "Log Return"
+) +
+theme_minimal()
+```
+
+> Prompt: Do you see any strong trend, large outliers, or recurring cycles?
+
+## Seasonal Plot
+
+While monthly equity returns often don't have a strong seasonal pattern, let's demonstrate the function:
+
+```{r}
+ggseasonplot(glen_ts, year.labels = TRUE, year.labels.left = TRUE) +
+labs(
+title = "Seasonal Plot: Glencore Monthly Returns",
+y = "Log Return",
+x = "Month"
+)
+```
+
+> If you see random scatter, that suggests little seasonal effect.
+
+## Subseries Plot
+
+```{r}
+ggsubseriesplot(glen_ts) +
+labs(
+title = "Subseries Plot: Glencore Monthly Returns",
+y = "Log Return"
+)
+```
+
+> Subseries grouping by month helps highlight any recurring monthly patterns.
+
+# Normality Checks
+
+## Histogram with Overlaid Normal
+
+```{r}
+glen %>%
+    ggplot(aes(x = log_return)) +
+    geom_histogram(aes(y = ..density..), bins = 30, fill="skyblue", alpha = 0.8) +
+    stat_function(
+        fun = dnorm,
+        args = list(mean = mean(glen$log_return),
+        sd   = sd(glen$log_return)),
+        color = "red",
+        size = 1
+        ) +
+    labs(
+    title = "Glencore Log Returns vs. The Normal Distribution",
+    x = "Log Return",
+    y = "Density"
+    ) +
+    theme_minimal()
+```
+
+> Prompt: Are the tails heavier or lighter than the overlaid normal?
+
+## QQ-Plot
+
+```{r}
+glen %>% ggplot(aes(sample = log_return)) + 
+    stat_qq(distribution = qnorm) + 
+    stat_qq_line(distribution = qnorm, color="red") + 
+    labs( title = "QQ Plot of Glencore Log Returns", 
+           x = "Theoretical Quantiles (Normal)", 
+           y = "Sample Quantiles" ) + 
+    theme_minimal()
+```
+
+
+**Interpretation:** 
+
+- Perfectly normal data should lie on the red line. 
+- Points deviating far in the upper/lower extremes may indicate fat tails or skew.
+
+## Shapiro-Wilk Test
+
+```{r}
+shapiro.test(glen$log_return)
+```
+
+- Null hypothesis: The data are normally distributed. 
+- If p-value \< 0.05, we usually reject normality. 
+- Caution: Large sample sizes can make tiny deviations appear significant.
+
+# Autocorrelation & Seasonal Patterns
+
+## Autocorrelation Function (ACF)
+
+```{r}
+ggAcf(glen_ts) + labs(title = "ACF: Glencore Monthly Log Returns")
+```
+
+**Reading the ACF:** 
+- If the first lag is near zero, it implies little linear dependence between consecutive months. 
+- Significant peaks at certain lags might indicate cyclical patterns or autocorrelation.
+
+## Lag Plot
+
+```{r}
+gglagplot(glen_ts)
+```
+
+Each small scatterplot checks log_return~t~ vs. log_return~(t - k)~
+
+# Exercises
+
+Change the Ticker: 
+
+Choose a different stock (e.g. "AMZN", "BARC.L" for Barclays, etc.) and replicate steps 3–5. 
+
+2. Discuss Normality: 
+- Does the histogram or QQ-plot indicate fat tails? 
+- Why might normality be a poor assumption for daily or monthly returns? 
+
+3. Autocorrelation: 
+- Are you seeing any significant correlation at lag=1 or lag=2? 
+- If so, what might that imply about "efficient market" assumptions? 
+
+4. Seasonality:
+- If you do see a monthly pattern, can you guess economic reasons behind it?
+
+# Conclusion
+
+:::{.callout-tip}
+### Key Takeaways: 
+- Visual arguments are vital: time plots, QQ-plots, and ACF often reveal critical patterns that summary stats obscure. 
+- Normality is often assumed in finance but rarely holds strictly. 
+- Autocorrelation indicates potential predictability, though many equity returns appear close to random noise.
+
+You've practiced the core of exploring a financial time series. The next step is to delve into more advanced modeling (ARIMA, GARCH, etc.) or smoothing techniques, which we'll cover in Tutorial 3.
+:::
