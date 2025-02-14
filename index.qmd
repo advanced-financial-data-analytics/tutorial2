@@ -6,11 +6,11 @@ date: "Last updated: `r Sys.Date()`"
 format:
     html:
         code-fold: true
-        embed-resources: true
         toc: true
         toc-depth: 3
         code-tools:
              source: https://github.com/advanced-financial-data-analytics/tutorial2
+embed-resources: true
 number-sections: true
 editor: visual
 execute:
